@@ -1,0 +1,59 @@
+﻿@using CAT.AID.Web.Models.DTO
+@model List<AssessmentCompareVM>
+
+@{
+    var assessments = ViewBag.Assessments as List<CAT.AID.Models.Assessment>;
+}
+
+<h2 class="mb-3 text-primary fw-bold">Assessment Comparison Report</h2>
+
+<table class="table table-bordered table-striped table-sm">
+    <thead>
+        <tr class="table-dark">
+            <th>Section</th>
+            <th>Question</th>
+            @foreach (var a in assessments)
+            {
+                <th>
+                    @a.Candidate.FullName <br />
+                    <span class="text-muted">(ID @a.Id)</span>
+                </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Model)
+        {
+            <tr>
+                <td class="fw-bold">@row.Section</td>
+                <td>@row.Question</td>
+
+                @foreach (var a in assessments)
+                {
+                    var score = row.Scores.ContainsKey(a.Id) ? row.Scores[a.Id] : null;
+                    string bg =
+                        score == null ? "background:#f8f8f8" :
+                        score == 3 ? "background:#d4f8d4" :
+                        score == 2 ? "background:#fff8c4" :
+                        score == 1 ? "background:#ffe1c4" :
+                        "background:#ffb3b3";
+
+                    <td style="@bg" class="text-center fw-bold">
+                        @(score?.ToString() ?? "—")
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="text-end mt-4">
+    <a asp-action="MyTasks" class="btn btn-secondary">⬅ Back to My Tasks</a>
+</div>
+
+<style>
+    table th, table td {
+        vertical-align: middle !important;
+        font-size: 14px;
+    }
+</style>

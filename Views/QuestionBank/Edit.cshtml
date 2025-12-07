@@ -1,0 +1,81 @@
+﻿@using CAT.AID.Web.Models.DTO
+@model (string section, AssessmentQuestion q, List<AssessmentSection> all)
+
+<h3 class="fw-bold mb-4" style="color:#003366;">
+    @((Model.q == null) ? "➕ Add Question" : "✏ Edit Question")
+</h3>
+
+<style>
+    .form-label {
+        font-weight: 600;
+        color: #003366;
+    }
+    .btn-navy {
+        background: #003366;
+        color: #fff;
+        font-weight: 600;
+    }
+    .btn-navy:hover {
+        background: #001f4d;
+        color: #fff;
+    }
+    .box {
+        border: 1px solid #9bb3d1;
+        padding: 20px;
+        border-radius: 8px;
+        background: #f5f9ff;
+    }
+</style>
+
+<div class="box">
+<form method="post">
+
+    <!-- Section Dropdown -->
+    <label class="form-label">Section / Domain</label>
+        <select name="section" class="form-select mb-3" required>
+            @foreach (var s in Model.all)
+            {
+                <option value="@s.Category" selected="@(Model.section == s.Category ? "selected" : null)">
+                    @s.Category
+                </option>
+            }
+        </select>
+
+
+    <!-- Question ID -->
+    <label class="form-label">Question ID</label>
+    <input name="Id" class="form-control mb-3"
+           value="@Model.q?.Id"
+           @(Model.q != null ? "readonly" : "") required />
+
+    <!-- Question Text -->
+    <label class="form-label">Question Text</label>
+    <textarea name="Text" class="form-control mb-3" rows="2" required>@Model.q?.Text</textarea>
+
+    <!-- Options CSV -->
+    <label class="form-label">Options (comma separated)</label>
+    <input name="Options"
+           class="form-control mb-3"
+           value="@(Model.q == null ? "" : string.Join(",", Model.q.Options))"
+           required />
+
+    <!-- Correct Answer -->
+    <label class="form-label">Correct Answer (Optional)</label>
+    <input name="Correct" class="form-control mb-3" value="@Model.q?.Correct" />
+
+    <!-- Score Weight -->
+    <label class="form-label">Score Weight (0–3)</label>
+    <input type="number" min="0" max="3"
+           name="ScoreWeight"
+           class="form-control mb-3"
+           value="@(Model.q?.ScoreWeight ?? 0)"
+           required />
+
+    <!-- Buttons -->
+    <div class="text-end">
+        <button class="btn btn-navy me-2">💾 Save</button>
+        <a href="/QuestionBank" class="btn btn-secondary">Back</a>
+    </div>
+
+</form>
+</div>

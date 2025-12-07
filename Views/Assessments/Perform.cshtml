@@ -1,0 +1,198 @@
+﻿@using CAT.AID.Models
+@using CAT.AID.Web.Models.DTO
+@model Assessment
+
+@{
+    var sections = ViewBag.Sections as List<AssessmentSection>;
+    var saved = string.IsNullOrWhiteSpace(Model.AssessmentResultJson)
+        ? new Dictionary<string, string>()
+        : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(Model.AssessmentResultJson);
+
+    bool editable = Model.IsEditableByAssessor;
+}
+
+<!-- 🔵 PAGE TITLE -->
+<h3 class="fw-bold mb-4" style="color:#003366;">Assessment – @Model.Candidate.FullName</h3>
+
+<style>
+    .nav-tabs .nav-link {
+        color: #003366;
+        font-weight: 600;
+    }
+
+        .nav-tabs .nav-link.active {
+            color: #003366;
+            background-color: #eaf1ff;
+            border-color: #003366 #003366 #fff;
+        }
+
+    .question-box {
+        border: 1px solid #c6d4ec;
+        background: #f3f7ff;
+        border-radius: 6px;
+    }
+
+    .btn-save {
+        background: #ffc107;
+        font-weight: 600;
+        color: #003366;
+    }
+
+    .btn-submit {
+        background: #003366;
+        color: white;
+        font-weight: 600;
+    }
+
+        .btn-submit:hover {
+            background: #001f4d;
+            color: #fff;
+        }
+
+    a.file-link {
+        color: #003366;
+        font-weight: 600;
+    }
+</style>
+
+<form asp-action="Perform" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+
+    <ul class="nav nav-tabs mb-3">
+        @for (int i = 0; i < sections.Count; i++)
+        {
+            <li class="nav-item">
+                <button class="nav-link @(i == 0 ? "active" : "")"
+                        data-bs-toggle="tab" data-bs-target="#tab-@i" type="button">
+                    @sections[i].Category
+                </button>
+            </li>
+        }
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button">Summary</button>
+        </li>
+    </ul>
+
+    <div class="tab-content border p-3 rounded bg-white">
+
+        @for (int i = 0; i < sections.Count; i++)
+        {
+            var sec = sections[i];
+            <div class="tab-pane @(i == 0 ? "show active" : "")" id="tab-@i">
+
+                @foreach (var q in sec.Questions)
+                {
+                    string cleanId = q.Id.ToString().Trim();
+                    string ansKey = $"ANS_{cleanId}";
+                    string scoreKey = $"SCORE_{cleanId}";
+                    string cmtKey = $"CMT_{cleanId}";
+                    string fileKey = $"FILE_{cleanId}";
+
+                    saved.TryGetValue(ansKey, out string savedAns);
+                    saved.TryGetValue(scoreKey, out string savedScore);
+                    saved.TryGetValue(cmtKey, out string savedCmt);
+                    saved.TryGetValue(fileKey, out string savedFile);
+
+                    <div class="p-3 mb-3 question-box">
+                        <p class="fw-bold text-dark">@q.Text</p>
+
+                        <!-- Response -->
+                        <select class="form-select mb-2 response-dropdown"
+                                name="@ansKey"
+                                data-question-id="@cleanId"
+                                @(editable ? "" : "disabled")>
+                            <option value="">-- select --</option>
+                            <option value="0" selected="@(savedAns == "0")">Dependent / No Exposure / Not Applicable</option>
+                            <option value="1" selected="@(savedAns == "1")">Physical Prompting</option>
+                            <option value="2" selected="@(savedAns == "2")">Verbal Prompting</option>
+                            <option value="3" selected="@(savedAns == "3")">Independent</option>
+                        </select>
+
+                        <input type="hidden" id="score_@cleanId" name="@scoreKey"
+                               class="score-input"
+                               value="@(String.IsNullOrEmpty(savedScore) ? "0" : savedScore)" />
+
+                        <!-- Comments -->
+                        <textarea name="@cmtKey"
+                          class="form-control mb-2"
+                          rows="2"
+                          @(editable ? "" : "readonly")>@savedCmt</textarea>
+
+                        <!-- File -->
+                        <label class="fw-semibold">Upload Evidence (optional)</label>
+                        <input type="file" name="@fileKey" class="form-control" @(editable ? "" : "disabled") />
+
+                        @if (!string.IsNullOrWhiteSpace(savedFile))
+                        {
+                            <div class="mt-1">
+                                📎 <a href="/uploads/@savedFile" class="file-link" target="_blank">View Existing Evidence</a>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- SUMMARY TAB -->
+        <div class="tab-pane" id="tab-summary">
+            <h5 class="fw-bold" style="color:#003366;">Final Summary</h5>
+
+            <label class="fw-semibold">Overall Comments by Assessor</label>
+            <textarea name="SUMMARY_COMMENTS" class="form-control mb-3" rows="4"
+                      @(editable ? "" : "readonly")>@(saved.ContainsKey("SUMMARY_COMMENTS") ? saved["SUMMARY_COMMENTS"] : "")</textarea>
+
+            <label class="fw-semibold">Upload Final Supporting Evidence</label>
+            <input type="file" name="LEAD_FILES" class="form-control" />
+
+            @if (saved.ContainsKey("LEAD_FILES") && !string.IsNullOrWhiteSpace(saved["LEAD_FILES"]))
+            {
+                <div class="mt-2">
+                    📎 <a href="/uploads/@saved["LEAD_FILES"]" class="file-link" target="_blank">View Uploaded Evidence</a>
+                </div>
+            }
+
+            <div class="alert alert-info fs-5 fw-bold mt-4">
+                Total Score: <span id="totalScore"></span> /
+                <span id="maxScore"></span> |
+                <span id="percentScore"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-end mt-3">
+        @if (editable)
+        {
+            <button type="submit" name="actionType" value="save" class="btn btn-save me-2">💾 Save Assessment</button>
+            <button type="submit" name="actionType" value="submit" class="btn btn-submit">📤 Submit for Review</button>
+        }
+        else
+        {
+            <button class="btn btn-secondary" disabled>Assessment Locked</button>
+        }
+    </div>
+</form>
+
+<script>
+    document.addEventListener("change", e => {
+        if (e.target.classList.contains("response-dropdown")) {
+            const qId = e.target.getAttribute("data-question-id");
+            document.getElementById("score_" + qId).value = e.target.value;
+            updateTotals();
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => updateTotals());
+
+    function updateTotals() {
+        let total = 0;
+        let max = document.querySelectorAll(".score-input").length * 3;
+
+        document.querySelectorAll(".score-input").forEach(x => {
+            const v = Number(x.value);
+            if (!isNaN(v)) total += v;
+        });
+
+        document.getElementById("totalScore").innerText = total;
+        document.getElementById("maxScore").innerText = max;
+        document.getElementById("percentScore").innerText = ((total / max) * 100).toFixed(1) + "%";
+    }
+</script>

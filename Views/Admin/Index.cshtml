@@ -1,0 +1,22 @@
+﻿@model IEnumerable<CAT.AID.Web.Models.ApplicationUser>
+
+<h2>Users</h2>
+<table class="table table-bordered">
+    <tr>
+        <th>Email</th>
+        <th>Location</th>
+        <th>Actions</th>
+    </tr>
+    @foreach (var u in Model)
+    {
+        <tr>
+            <td>@u.Email</td>
+            <td>@u.Location</td>
+            <td>
+                <a class="btn btn-sm btn-primary" href="/Admin/Users/Edit/@u.Id">Edit</a>
+                <a class="btn btn-sm btn-warning" href="/Admin/Users/ResetPassword/@u.Id">Reset Password</a>
+                <a class="btn btn-sm btn-danger" href="/Admin/Users/Delete/@u.Id">Delete</a>
+            </td>
+        </tr>
+    }
+</table>

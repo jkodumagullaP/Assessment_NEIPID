@@ -1,0 +1,85 @@
+﻿@using CAT.AID.Models
+@using CAT.AID.Models.DTO
+@model Dictionary<int, AssessmentScoreDTO>
+
+@{
+    var assessments = ViewBag.Assessments as List<Assessment>;
+
+    var allSections = Model.Values
+        .SelectMany(a => a.SectionScores.Keys)
+        .Distinct()
+        .ToList();
+
+    var ids = ViewBag.AssessmentIds as IEnumerable<int> ?? Enumerable.Empty<int>();
+    var urlQuery = string.Join("&", ids.Select(id => $"ids={id}"));
+}
+
+<h2 class="mb-3 text-primary">
+    📊 Compare Assessments – @assessments.First().Candidate.FullName
+</h2>
+
+<table class="table table-bordered table-hover table-sm align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Section</th>
+            @foreach (var a in assessments)
+            {
+                <th class="text-center">@a.CreatedAt.ToString("dd-MMM-yyyy hh:mm tt")</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var sec in allSections)
+        {
+            <tr class="table-secondary fw-bold">
+                <td colspan="@(assessments.Count + 1)">@sec</td>
+            </tr>
+
+            <!-- Get all unique questions inside this section -->
+            var allQs = Model.Values
+            .Where(m => m.SectionQuestionScores != null && m.SectionQuestionScores.ContainsKey(sec))
+            .SelectMany(m => m.SectionQuestionScores[sec].Keys)
+            .Distinct()
+            .ToList();
+
+            foreach (var q in allQs)
+            {
+                <tr>
+                    <td class="ps-4">@q</td>
+
+                    @foreach (var a in assessments)
+                    {
+                        if (Model[a.Id].SectionQuestionScores != null &&
+                        Model[a.Id].SectionQuestionScores.TryGetValue(sec, out var qMap) &&
+                        qMap.TryGetValue(q, out var val))
+                        {
+                            <td class="text-center">@val</td>
+                        }
+                        else
+                        {
+                            <td class="text-center text-muted">—</td>
+                        }
+                    }
+                </tr>
+            }
+        }
+
+        <tr class="table-primary fw-bold">
+            <td>Total Score</td>
+            @foreach (var a in assessments)
+            {
+                <td class="text-center">@Model[a.Id].TotalScore / @Model[a.Id].MaxScore</td>
+            }
+        </tr>
+    </tbody>
+
+</table>
+
+<a class="btn btn-danger mt-3"
+   href="/Assessments/ExportComparisonPdf?@urlQuery">
+    📄 Export Comparison PDF
+</a>
+
+<a class="btn btn-secondary mt-3" href="/Assessments/MyTasks">
+    ⬅ Back to My Assessments
+</a>

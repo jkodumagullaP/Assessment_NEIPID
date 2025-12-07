@@ -1,0 +1,36 @@
+﻿@model IEnumerable<CAT.AID.Models.Assessment>
+
+<h3 class="text-primary fw-bold mb-3">Pending Assessments</h3>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Candidate</th>
+            <th>Created At</th>
+            <th>Assessor</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Candidate.FullName</td>
+                <td>@item.CreatedAt.ToString("dd-MMM-yyyy")</td>
+                <td>@item.AssessorId</td>
+                <td>
+                    <form method="post" asp-action="UpdateStatus">
+                        <input type="hidden" name="id" value="@item.Id" />
+                                                <a href="/Assessments/Review/@item.Id" class="btn btn-primary btn-sm">Review</a>
+
+                        <button name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                        <button name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                        <button name="action" value="sendback" class="btn btn-warning btn-sm">Send Back</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

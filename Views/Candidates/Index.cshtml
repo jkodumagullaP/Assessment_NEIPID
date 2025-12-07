@@ -1,0 +1,73 @@
+﻿@model IEnumerable<CAT.AID.Models.Candidate>
+@{
+    ViewBag.Title = "Candidates";
+}
+
+<h2>Candidates</h2>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Create", "Candidates")">Add Candidate</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.FullName</td>
+                <td>@c.CommunicationAddress</td>
+                <td>
+                    <div class="dropdown">
+                        
+                        <a class="dropdown-item" href="@Url.Action("Edit", "Candidates", new { id = c.Id })">
+                            ✏ Edit
+                        </a>
+                        <a class="dropdown-item" href="@Url.Action("Assign", "Candidates", new { id = c.Id })">
+                            📝 Assign Assessment
+                        </a>
+                       
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="@Url.Action("Edit", "Candidates", new { id = c.Id })">
+                                ✏ Edit
+                            </a>
+                            <a class="dropdown-item" href="@Url.Action("Assign", "Candidates", new { id = c.Id })">
+                                📝 Assign Assessment
+                            </a>
+                            <a class="dropdown-item" href="@Url.Action("History", "Assessments", new { id = c.Id })">
+                                📚 Assessment History
+                            </a>
+                            <a class="dropdown-item" href="@Url.Action("Progress", "Candidates", new { id = c.Id })">
+                                📈 Progress
+                            </a>
+
+                            @if (!c.IsArchived)
+                            {
+                                <a asp-action="Archive" asp-route-id="@c.Id"
+                                   class="btn btn-warning btn-sm">📦 Archive</a>
+                            }
+                            else
+                            {
+                                <a asp-action="Unarchive" asp-route-id="@c.Id"
+                                   class="btn btn-success btn-sm">♻ Restore</a>
+                            }
+
+                            <a asp-action="Delete" asp-route-id="@c.Id"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Permanently delete this candidate?')">
+                                🗑 Delete
+                            </a>
+
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

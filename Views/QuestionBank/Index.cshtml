@@ -1,0 +1,51 @@
+﻿@using CAT.AID.Web.Models.DTO
+@model List<AssessmentSection>
+<h3 class="fw-bold text-primary mb-3">Question Bank</h3>
+
+<a href="/QuestionBank/Edit" class="btn btn-success mb-3">➕ Add New Question</a>
+
+
+<form method="post" enctype="multipart/form-data" asp-action="Upload" class="d-inline-block me-2">
+    <input type="file" name="file" class="form-control d-inline-block" style="width:250px;" required />
+    <button class="btn btn-primary mt-1">⬆ Import Excel</button>
+</form>
+
+<a href="/QuestionBank/Download" class="btn btn-success mt-1">⬇ Export Excel</a>
+
+
+
+@foreach (var sec in Model)
+{
+    <h5 class="section-title">@sec.Category</h5>
+
+
+    <table class="table table-bordered table-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Question</th>
+                <th>Correct</th>
+                <th>Weight</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var q in sec.Questions)
+            {
+                <tr>
+                    <td>@q.Id</td>
+                    <td>@q.Text</td>
+                    <td>@q.Correct</td>
+                    <td>@q.ScoreWeight</td>
+                    <td>
+                        <a href="/QuestionBank/Edit?id=@q.Id" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="/QuestionBank/Delete/@q.Id"
+                           onclick="return confirm('Delete this question?')"
+                           class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+

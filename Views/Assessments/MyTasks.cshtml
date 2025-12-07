@@ -1,0 +1,112 @@
+﻿@using CAT.AID.Web.Models.DTO
+@model IEnumerable<CandidateAssessmentPivotVM>
+
+@{
+    var timestamps = ViewBag.Timestamps as List<DateTime>;
+}
+
+<h2 class="mb-3 text-primary fw-bold"><i class="bi bi-clipboard-check"></i> My Assessments</h2>
+
+<form method="get" action="/Assessments/Compare">
+    <table class="table table-bordered table-hover table-sm align-middle">
+        <thead style="background:#003366; color:white;">
+            <tr>
+                <th style="width:200px;">Candidate</th>
+                @foreach (var ts in timestamps)
+                {
+                    <th class="text-center">@ts.ToString("dd-MMM-yyyy HH:mm")</th>
+                }
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var row in Model)
+            {
+                <tr>
+                    <td class="fw-bold">@row.CandidateName</td>
+
+                    @foreach (var ts in timestamps)
+                    {
+                        var entry = row.AssessmentIds.FirstOrDefault(x => x.Key == ts);
+                        var id = entry.Value;
+
+                        if (id.HasValue)
+                        {
+                            var status = row.StatusMapping[id.Value];
+
+                            bool canEdit = status == "Assigned" || status == "InProgress" || status == "SentBack";
+                            string url = canEdit ? $"/Assessments/Perform/{id}" : $"/Assessments/View/{id}";
+
+                            <!-- NEW unified color mapping -->
+                            string btnClass = status switch
+                            {
+                                "Approved" => "btn-success",
+                                "Submitted" => "btn-primary",      /* Navy Blue */
+                                "InProgress" => "btn-warning",
+                                "Assigned" => "btn-warning",
+                                "SentBack" => "btn-warning",      /* amber instead of red */
+                                "Rejected" => "btn-secondary",    /* purple replaced with grey */
+                                _ => "btn-secondary"
+                            };
+
+                            <td class="text-center">
+                                <!-- Compare checkbox -->
+                                <input type="checkbox"
+                                       name="ids"
+                                       value="@id"
+                                       data-candidate="@row.CandidateId"
+                                       class="form-check-input compare-box mb-1" />
+
+                                <!-- status button -->
+                                <a href="@url" class="btn btn-sm w-100 fw-bold @btnClass">
+                                    @status
+                                </a>
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="text-center text-muted">—</td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Hidden candidate ID -->
+    <input type="hidden" id="candidateId" name="candidateId" value="" />
+
+    <button id="compareBtn" class="btn btn-primary mt-2 fw-bold" disabled>
+        <i class="bi bi-search"></i> Compare Selected
+    </button>
+</form>
+
+<script>
+    const boxes = document.querySelectorAll(".compare-box");
+    const btn = document.getElementById("compareBtn");
+    const hiddenCandidate = document.getElementById("candidateId");
+
+    boxes.forEach(cb => {
+        cb.addEventListener("change", () => {
+            const selected = [...boxes].filter(x => x.checked);
+
+            if (selected.length < 2) {
+                btn.disabled = true;
+                hiddenCandidate.value = "";
+                return;
+            }
+
+            const candidateIds = [...new Set(selected.map(x => x.dataset.candidate))];
+
+            if (candidateIds.length === 1) {
+                hiddenCandidate.value = candidateIds[0];
+                btn.disabled = false;
+            } else {
+                alert("⚠ Please select assessments for the SAME candidate only.");
+                cb.checked = false;
+                btn.disabled = true;
+                hiddenCandidate.value = "";
+            }
+        });
+    });
+</script>

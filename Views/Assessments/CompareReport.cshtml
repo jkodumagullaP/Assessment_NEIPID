@@ -1,0 +1,113 @@
+﻿@model List<CAT.AID.Models.DTO.CandidateProgressDTO>
+@{
+    var candidate = ViewBag.Candidate;
+    Layout = "_Layout";
+}
+
+<h2 class="text-primary mb-3">
+    📊 Assessment Comparison — @candidate.FullName
+</h2>
+
+<div class="d-flex gap-2 mb-3">
+    <a href="/Candidates/Progress/@candidate.Id" class="btn btn-secondary btn-sm">⬅ Back to Progress</a>
+    <a href="/Assessments/ProgressReport/@candidate.Id" class="btn btn-danger btn-sm">📄 Download Progress PDF</a>
+</div>
+
+<hr />
+
+<h4 class="text-primary">Assessment Summary Table</h4>
+<table class="table table-bordered table-striped shadow-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>Assessment ID</th>
+            <th>Date</th>
+            <th>Total Score</th>
+            <th>Percentage</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.AssessmentId</td>
+                <td>@a.Date.ToString("dd-MMM-yyyy")</td>
+                <td>@a.Total / @a.Max</td>
+                <td>@a.Percentage.ToString("0.0")%</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h4 class="text-primary">📈 Percentage Improvement Trend</h4>
+<div class="card p-3 shadow-sm mb-4">
+    <canvas id="trendChart" height="120"></canvas>
+</div>
+
+<h4 class="text-primary">🧠 Domain-wise Performance Comparison</h4>
+<div class="card p-3 shadow-sm">
+    <canvas id="domainChart" height="160"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // ========== Chart 1: Percentage Trend ==========
+    var labels = [@string.Join(",", Model.Select(x => "\"" + x.Date.ToString("dd-MMM") + "\""))];
+    var percentages = [@string.Join(",", Model.Select(x => x.Percentage.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)))];
+
+    new Chart(document.getElementById("trendChart"), {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Overall Percentage",
+                data: percentages,
+                borderWidth: 3,
+                fill: false,
+                tension: 0.25
+            }]
+        }
+    });
+
+    // ========== Chart 2: Section Comparison ==========
+    var domainLabels = [];
+    var datasets = [];
+
+    // Domain labels from first assessment
+    @foreach (var entry in Model.First().SectionScores)
+    {
+            @:domainLabels.push("@entry.Key");
+    }
+
+        @{
+            var datasetIndex = 0;
+    }
+    @foreach (var x in Model)
+    {
+            <text>
+            datasets.push({
+                label: "Assessment @x.AssessmentId",
+                data: [
+                    @string.Join(",", x.SectionScores.Select(v =>
+                        ((v.Value / (x.Max / x.SectionScores.Count)) * 100)
+                        .ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)
+                                ))
+            ],
+            borderWidth: 2,
+            fill: false,
+            tension: 0.25
+        });
+        </text>
+                datasetIndex++;
+    }
+
+    new Chart(document.getElementById("domainChart"), {
+        type: "line",
+        data: {
+            labels: domainLabels,
+            datasets: datasets
+        }
+    });
+</script>

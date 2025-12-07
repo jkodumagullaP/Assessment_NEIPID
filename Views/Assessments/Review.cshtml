@@ -1,0 +1,216 @@
+﻿@using CAT.AID.Models
+@using CAT.AID.Models.DTO
+@using CAT.AID.Web.Models.DTO
+
+@model Assessment
+@{
+    var recommendations = ViewBag.Recommendations as Dictionary<string, List<string>>;
+    var weakDetails = ViewBag.WeakDetails as Dictionary<string, List<string>>;
+}
+
+@{
+    var sections = ViewBag.Sections as List<AssessmentSection>;
+    var saved = string.IsNullOrWhiteSpace(Model.AssessmentResultJson)
+        ? new Dictionary<string, string>()
+        : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(Model.AssessmentResultJson);
+
+    var score = string.IsNullOrWhiteSpace(Model.ScoreJson)
+        ? new AssessmentScoreDTO()
+        : System.Text.Json.JsonSerializer.Deserialize<AssessmentScoreDTO>(Model.ScoreJson);
+}
+
+<h3 class="text-primary fw-bold mb-3">Assessment Result — @Model.Candidate.FullName</h3>
+
+<div class="alert alert-secondary">
+    <strong>Candidate:</strong> @Model.Candidate.FullName <br />
+    <strong>Assessor:</strong> @(Model.Assessor?.FullName ?? "N/A") <br />
+    <strong>Status:</strong> <span class="fw-bold">@Model.Status</span>
+</div>
+
+@{
+    double iqPercent = score.MaxScore > 0 ? Math.Round(((double)score.TotalScore / score.MaxScore) * 100, 2) : 0;
+    string iqLevel = iqPercent >= 80 ? "Highly Developed"
+                    : iqPercent >= 60 ? "Above Average"
+                    : iqPercent >= 40 ? "Average"
+                    : "Below Average";
+
+    string iqColor = iqPercent >= 80 ? "#007A33"   // greenish blue
+                  : iqPercent >= 60 ? "#003366"   // navy blue
+                  : iqPercent >= 40 ? "#FFA500"   // amber
+                  : "#50308A";                    // purple instead of red
+}
+
+<div class="alert alert-info mt-2" style="font-size:16px;">
+    <strong>IQ %:</strong>
+    <span style="font-weight:bold; color:@iqColor">@iqPercent %</span>
+    &nbsp;&nbsp;
+    <strong>IQ Level:</strong>
+    <span style="font-weight:bold; color:@iqColor">@iqLevel</span>
+</div>
+
+<ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#report">📊 Report</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#score">🧾 Score & Comments</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#details">📑 Detailed Report</a></li>
+    <li class="nav-item ms-auto"><span class="nav-link disabled fw-bold">IQ %: @iqPercent %</span></li>
+</ul>
+
+<div class="tab-content border border-top-0 p-3 bg-white">
+
+    <!-- TAB 1: SUMMARY -->
+    <div id="report" class="tab-pane fade show active">
+
+        <div class="row text-center">
+            <div class="col-md-6 mb-3"><canvas id="barChart" height="220"></canvas></div>
+            <div class="col-md-6 mb-3"><canvas id="doughnutChart" height="220"></canvas></div>
+        </div>
+
+        <hr />
+        <h5 class="fw-bold">Key Metrics</h5>
+        <ul>
+            <li><strong>Total Score:</strong> @score.TotalScore / @score.MaxScore</li>
+            <li><strong>Completed At:</strong> @(Model.SubmittedAt?.ToString("dd-MMM-yyyy HH:mm") ?? "N/A")</li>
+        </ul>
+
+        <hr />
+        <!-- RECOMMENDATIONS -->
+        <h5 class="fw-bold text-primary">🎯 Recommendations</h5>
+
+        @if (recommendations != null && recommendations.Any())
+        {
+            @foreach (var item in recommendations)
+            {
+                <div class="border rounded p-3 mb-3">
+                    <h6 class="fw-bold text-primary">@item.Key — Needs Support</h6>
+                    <ul class="mb-0">
+                        @foreach (var rec in item.Value)
+                        {
+                            <li>@rec</li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-primary">🌟 No recommendations required — all domains show strong performance.</div>
+        }
+
+        <!-- DETAILED WEAK QUESTION ANALYSIS -->
+        @if (weakDetails != null && weakDetails.Any())
+        {
+            <hr />
+            <h5 class="fw-bold text-primary">🧠 Detailed Analysis of Weaker Questions</h5>
+
+            @foreach (var item in weakDetails)
+            {
+                <div class="border rounded p-3 mb-3 bg-light">
+                    <h6 class="fw-bold text-primary">@item.Key</h6>
+                    <ul class="mb-0">
+                        @foreach (var detail in item.Value)
+                        {
+                            <li>@detail</li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+
+        <hr />
+        <h5 class="fw-bold">Section Performance</h5>
+        @if (score.SectionScores.Any())
+        {
+            var strongest = score.SectionScores.OrderByDescending(x => x.Value).First();
+            var weakest = score.SectionScores.OrderBy(x => x.Value).First();
+
+            <p class="fw-bold text-success">🟢 Strongest Area: @strongest.Key (@strongest.Value)</p>
+            <p class="fw-bold text-primary">🔻 Weakest Area: @weakest.Key (@weakest.Value)</p>
+        }
+
+        <hr />
+
+        <!-- QUESTIONS TABLES -->
+        @foreach (var sec in sections)
+        {
+            <h5 class="mt-4 text-info fw-bold border-bottom pb-1">@sec.Category</h5>
+            <table class="table table-bordered table-sm">
+                <thead class="table-dark"><tr><th>Q ID</th><th>Question</th><th>Answer</th><th>Score</th><th>Comments</th></tr></thead>
+                <tbody>
+                    @foreach (var q in sec.Questions)
+                    {
+                        saved.TryGetValue($"ANS_{q.Id}", out string ans);
+                        saved.TryGetValue($"SCORE_{q.Id}", out string scr);
+                        saved.TryGetValue($"CMT_{q.Id}", out string cmt);
+
+                        string displayScore = string.IsNullOrEmpty(scr) ? "0" : scr;
+                        string color = displayScore switch
+                        {
+                            "3" => "text-success fw-bold",
+                            "2" => "text-primary fw-bold",
+                            "1" => "text-warning fw-bold",
+                            "0" => "text-primary fw-bold",
+                            _ => ""
+                        };
+
+                        <tr>
+                            <td>@q.Id</td>
+                            <td>@q.Text</td>
+                            <td>@(string.IsNullOrEmpty(ans) ? "-" : ans)</td>
+                            <td class="@color">@displayScore</td>
+                            <td>@(string.IsNullOrEmpty(cmt) ? "-" : cmt)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <div class="text-end mt-3">
+            <form method="post" action="/Assessments/ExportReportPdf/@Model.Id">
+                <input type="hidden" id="barChartImage" name="barChartImage" />
+                <input type="hidden" id="doughnutChartImage" name="doughnutChartImage" />
+                <button class="btn btn-primary mt-3">📄 Download PDF</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = @Html.Raw(Json.Serialize(score.SectionScores.Keys));
+    const values = @Html.Raw(Json.Serialize(score.SectionScores.Values));
+    const total = @score.TotalScore;
+    const remaining = @score.MaxScore - @score.TotalScore;
+
+    new Chart(document.getElementById("barChart"), {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [{
+                label: "Section Score",
+                data: values,
+                backgroundColor: "#1F5CAA",
+                borderColor: "#003366",
+                borderWidth: 2
+            }]
+        }
+    });
+
+    new Chart(document.getElementById("doughnutChart"), {
+        type: "doughnut",
+        data: {
+            labels: ["Achieved", "Remaining"],
+            datasets: [{
+                data: [total, remaining],
+                backgroundColor: ["#003366", "#9bbde6"]
+            }]
+        }
+    });
+
+    setTimeout(() => {
+        document.getElementById("barChartImage").value =
+            document.getElementById("barChart").toDataURL().split(",")[1];
+        document.getElementById("doughnutChartImage").value =
+            document.getElementById("doughnutChart").toDataURL().split(",")[1];
+    }, 1200);
+</script>

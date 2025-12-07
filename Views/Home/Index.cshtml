@@ -1,0 +1,75 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using CAT.AID.Web.Models
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    ViewData["Title"] = "Welcome";
+}
+
+<style>
+    .home-login-box {
+        position: absolute;
+        top: 115px;
+        right: 25px;
+        width: 310px;
+        background: #ffffff;
+        border: 2px solid #002147;
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 20;
+    }
+
+    .hero-image {
+        width: 100%;
+        max-width: 920px;
+        display: block;
+        margin: 40px auto 10px auto;
+        border-radius: 12px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+    }
+
+    .hero-quote {
+        text-align: center;
+        font-size: 22px;
+        font-weight: 500;
+        color: #002147;
+        margin-top: 15px;
+        line-height: 32px;
+    }
+
+    .hero-sub {
+        text-align: center;
+        font-size: 17px;
+        color: #333;
+        width: 70%;
+        margin: 8px auto 32px auto;
+    }
+</style>
+
+@if (!SignInManager.IsSignedIn(User))
+{
+    <div class="home-login-box">
+        <h5 class="text-primary mb-3">🔐 Login</h5>
+        <form method="post" asp-controller="Account" asp-action="Login">
+            @Html.AntiForgeryToken()
+            <div class="mb-2">
+                <input name="Email" class="form-control" placeholder="Email" required />
+            </div>
+            <div class="mb-3">
+                <input name="Password" class="form-control" type="password" placeholder="Password" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100 fw-semibold">Login</button>
+        </form>
+    </div>
+}
+
+<img src="~/images/nimhnew.png" class="promo-image" />
+
+<div class="hero-quote">
+    “Every individual has the right to discover their potential and work towards a meaningful career.”
+</div>
+<div class="hero-sub">
+    Comprehensive Vocational Assessment Tool (CVAT) supports adults with intellectual disabilities
+    in skill exploration, job preparedness, and workplace confidence.
+</div>

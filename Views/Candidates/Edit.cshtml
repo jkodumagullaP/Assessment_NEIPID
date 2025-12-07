@@ -1,0 +1,8 @@
+﻿@model CAT.AID.Models.Candidate
+<h2>Edit Candidate</h2>
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.Partial("Create")
+</form>
+

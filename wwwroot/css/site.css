@@ -1,0 +1,154 @@
+﻿/* ---------- Primary Branding Colors ---------- */
+:root {
+    --blue-main: #0A3A75;
+    --blue-light: #1F5CAA;
+    --navy: #003366;
+    --navy-hover: #001F4D;
+    --gray-light: #f2f4f7;
+    --gray-medium: #d7dbe0;
+}
+
+/* ---------- Header ---------- */
+header {
+    background: var(--blue-main);
+    border-bottom: 4px solid var(--blue-light);
+    padding: 12px 0;
+    color: #fff;
+}
+
+/* ---------- NAV TABS ---------- */
+.nav-tabs .nav-link {
+    color: var(--navy) !important;
+    font-weight: 600;
+}
+
+    .nav-tabs .nav-link.active {
+        background: #fff !important;
+        color: var(--navy) !important;
+        border-color: var(--navy) var(--navy) #fff !important;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: var(--navy-hover) !important;
+    }
+
+/* ---------- TEXT PRIMARY OVERRIDE ---------- */
+.text-primary,
+h3.text-primary,
+h4.text-primary,
+h5.text-primary,
+.fw-bold.text-primary {
+    color: var(--navy) !important;
+}
+
+/* ---------- BUTTONS ---------- */
+.btn-primary {
+    background: var(--blue-main) !important;
+    border-color: var(--blue-main) !important;
+}
+
+    .btn-primary:hover {
+        background: var(--navy-hover) !important;
+    }
+
+.btn-secondary {
+    background: var(--gray-medium);
+    border-color: var(--gray-medium);
+}
+
+.btn-navy {
+    background: var(--navy);
+    color: white;
+    font-weight: 550;
+}
+
+    .btn-navy:hover {
+        background: var(--navy-hover);
+    }
+
+/* ---------- CARDS / BOXES ---------- */
+.card,
+.section-box {
+    background: white;
+    border: 1px solid var(--gray-medium);
+    border-radius: 6px;
+    padding: 12px;
+}
+
+/* ---------- TABLE HEAD ---------- */
+.table thead {
+    background: var(--navy) !important;
+    color: white !important;
+}
+
+    .table thead th {
+        font-weight: 600;
+    }
+
+/* ---------- SECTION HEADERS ---------- */
+.section-title {
+    color: var(--navy);
+    font-weight: 700;
+    border-bottom: 2px solid var(--navy);
+    padding-bottom: 4px;
+    margin-top: 18px;
+}
+
+/* ---------- CHART BORDER ---------- */
+canvas {
+    border: 1px solid rgba(0, 51, 102, 0.15);
+    border-radius: 6px;
+}
+
+/* ---------- PROMO IMAGE ---------- */
+.promo-image {
+    height: 88vh;
+    width: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+}
+
+/* ---------- FOOTER ---------- */
+.site-footer {
+    background: var(--blue-main);
+    color: white;
+    padding: 18px;
+    text-align: center;
+    margin-top: 40px;
+    font-size: 14px;
+}
+/* BLUE TAB STRIP */
+.nav-tabs {
+    background: #0A3A75 !important; /* Dark blue strip */
+    border-bottom: 3px solid #003366;
+    padding: 6px 10px;
+    border-radius: 6px 6px 0 0;
+}
+
+    /* INACTIVE TAB */
+    .nav-tabs .nav-link {
+        color: #dfe9ff !important; /* Light Blue text */
+        background: transparent !important;
+        font-weight: 600;
+        border: none !important;
+        margin-right: 6px;
+        padding: 10px 18px;
+    }
+
+        /* INACTIVE TAB HOVER */
+        .nav-tabs .nav-link:hover {
+            color: #ffffff !important;
+            background: rgba(255,255,255,0.1) !important;
+            border-radius: 6px 6px 0 0;
+        }
+
+        /* ACTIVE TAB */
+        .nav-tabs .nav-link.active {
+            background: #ffffff !important; /* White card */
+            color: #003366 !important; /* Navy text */
+            border: 2px solid #003366 !important;
+            border-bottom: 0 !important;
+            border-radius: 6px 6px 0 0;
+            font-weight: 700;
+        }

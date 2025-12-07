@@ -1,0 +1,181 @@
+﻿@using CAT.AID.Models
+@model Candidate
+
+<h2 class="mb-3 text-primary fw-bold">Add Candidate</h2>
+
+@if (TempData["msg"] != null)
+{
+    <div class="alert alert-info fw-bold">@TempData["msg"]</div>
+}
+
+<div asp-validation-summary="All" class="text-primary fw-bold mb-2"></div>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <!-- SECTION 1: Identification Data -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header fw-bold bg-primary text-white">
+            Section 1 – Identification Data
+        </div>
+        <div class="card-body row g-3">
+
+            <div class="col-md-6">
+                <label class="fw-bold">Name of the Trainee <span class="text-primary fw-bold">*</span></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-primary fw-bold"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Gender <span class="text-primary fw-bold">*</span></label>
+                <select asp-for="Gender" class="form-select">
+                    <option value="">-- Select --</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Transgender</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-primary fw-bold"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Date of Birth <span class="text-primary fw-bold">*</span></label>
+                <input asp-for="DOB" type="date" class="form-control" />
+                <span asp-validation-for="DOB" class="text-primary fw-bold"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label class="fw-bold">Level of Intellectual Disability</label>
+                <select asp-for="IntellectualLevel" class="form-select">
+                    <option>Mild</option>
+                    <option>Moderate</option>
+                    <option>Severe</option>
+                    <option>Profound</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Marital Status</label>
+                <select asp-for="MaritalStatus" class="form-select">
+                    <option>Single</option>
+                    <option>Married</option>
+                    <option>Separated</option>
+                    <option>Widow/Widower</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Education of the Trainee</label>
+                <input asp-for="Education" class="form-control" />
+            </div>
+
+            <div class="col-12"><hr /></div>
+            <h5 class="fw-bold text-primary">Parent / Guardian Details</h5>
+
+            <div class="col-md-6">
+                <label class="fw-bold">Father / Guardian's Name</label>
+                <input asp-for="FatherName" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Father's Education</label>
+                <input asp-for="FatherEducation" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Father's Occupation</label>
+                <input asp-for="FatherOccupation" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="fw-bold">Mother / Guardian's Name</label>
+                <input asp-for="MotherName" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Mother's Education</label>
+                <input asp-for="MotherEducation" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Mother's Occupation</label>
+                <input asp-for="MotherOccupation" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="fw-bold">Mother Tongue of the Trainee</label>
+                <input asp-for="MotherTongue" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="fw-bold">Other Languages (Comprehended / Spoken)</label>
+                <input asp-for="OtherLanguages" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: Family History -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header fw-bold bg-primary text-white">
+            Section 2 – Family History (Pedigree Chart)
+        </div>
+        <div class="card-body row g-3">
+
+            <div class="col-md-4">
+                <label class="fw-bold">Type of Family</label>
+                <select asp-for="FamilyType" class="form-select">
+                    <option>Joint</option>
+                    <option>Nuclear</option>
+                    <option>Single Parent</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="fw-bold">Family History of Disability / Disorder / Delay</label>
+                <select asp-for="FamilyDisabilityHistory" class="form-select">
+                    <option>No</option>
+                    <option>Yes</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="fw-bold">If Yes, mention the type</label>
+                <input asp-for="DisabilityType" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="fw-bold">Monthly Income of the Parents</label>
+                <input asp-for="MonthlyIncome" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="fw-bold">Type of Residential Area</label>
+                <select asp-for="ResidentialArea" class="form-select">
+                    <option>Rural</option>
+                    <option>Semi-Urban</option>
+                    <option>Urban</option>
+                    <option>Tribal</option>
+                    <option>Gated</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="fw-bold">Contact Number(s)</label>
+                <input asp-for="ContactNumber" class="form-control" />
+            </div>
+
+            <div class="col-md-12">
+                <label class="fw-bold">Communication Address</label>
+                <textarea asp-for="CommunicationAddress" rows="3" class="form-control"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success px-4">Save</button>
+    <a class="btn btn-secondary" href="/Candidates/Index">Cancel</a>
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

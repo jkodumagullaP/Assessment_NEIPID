@@ -1,0 +1,19 @@
+﻿@model IEnumerable<CAT.AID.Models.Assessment>
+<h2>Assessment History</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr><th>Status</th><th>Submitted</th><th>Reviewed</th><th>Approved</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var h in Model)
+        {
+            <tr>
+                <td>@h.Status</td>
+                <td>@h.SubmittedAt</td>
+                <td>@h.ReviewedAt</td>
+                <td>@h.ApprovedAt</td>
+            </tr>
+        }
+    </tbody>
+</table>
